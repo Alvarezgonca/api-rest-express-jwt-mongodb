@@ -1,0 +1,9 @@
+services:
+  mongo:
+    image: mongo
+    container_name: mongo-basico
+    ports:
+      - "27017:27017"
+    restart: always
+    volumes:
+      - ./data:/data/db
