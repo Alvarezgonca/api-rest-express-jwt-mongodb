@@ -12,41 +12,52 @@ API REST básica para registro de usuários, autenticação e CRUD de tarefas pr
 
 ---
 
-## Passos para rodar o projeto
 
-### 1. Clonar o repositório
-```bash
-git clone git@github.com:Alvarezgonca/api-rest-express-jwt-mongodb.git
-cd api-rest-express-jwt-mongodb
-```
+## Como rodar o projeto
 
+1. **Clonar o repositório**
+  ```bash
+  git clone git@github.com:Alvarezgonca/api-rest-express-jwt-mongodb.git
+  cd api-rest-express-jwt-mongodb
+  ```
 
-### 2. Instalar dependências do Node.js
-```bash
-npm install
-npm install bcrypt
-npm install jsonwebtoken
-```
+2. **Instalar dependências**
+  ```bash
+  npm install
+  npm install bcrypt jsonwebtoken dotenv
+  ```
 
-### 3. Subir o MongoDB com Docker Compose
-```bash
-docker compose up -d
-```
+3. **Configurar variáveis de ambiente**
+  Crie um arquivo `.env` na raiz do projeto com suas próprias chaves seguras:
+  ```
+  JWT_SECRET=sua_chave_super_secreta_aqui
+  JWT_REFRESH_SECRET=sua_chave_refresh_secreta_aqui
+  ```
+  O pacote `dotenv` carrega automaticamente as variáveis do `.env` para o código Node.js.
 
-### 4. Rodar a API
-```bash
-node index.js
-```
+4. **Subir o MongoDB com Docker Compose**
+  ```bash
+  docker compose up -d
+  ```
+
+5. **Rodar a API**
+  ```bash
+  node index.js
+  ```
+
 A API estará disponível em http://localhost:3000
 
 ---
 
-## Testando a rota de registro
 
-No Insomnia ou Postman:
-- Método: POST
-- URL: http://localhost:3000/auth/register
-- Body (JSON):
+## Testando a API
+
+Você pode testar as rotas usando Insomnia, Postman ou curl.
+
+### Registro de usuário
+**POST /auth/register**
+URL: http://localhost:3000/auth/register
+Body (JSON):
 ```json
 {
   "name": "Seu Nome",
@@ -54,13 +65,59 @@ No Insomnia ou Postman:
   "password": "suaSenha"
 }
 ```
+Resposta esperada:
+```json
+{
+  "message": "Usuário registrado com sucesso"
+}
+```
+
+### Login
+**POST /auth/login**
+URL: http://localhost:3000/auth/login
+Body (JSON):
+```json
+{
+  "email": "seu@email.com",
+  "password": "suaSenha"
+}
+```
+Resposta esperada:
+```json
+{
+  "accessToken": "...",
+  "refreshToken": "...",
+  "user": {
+    "_id": "...",
+    "name": "Seu Nome",
+    "email": "seu@email.com"
+  }
+}
+```
+
+### Refresh Token
+**POST /auth/refresh**
+URL: http://localhost:3000/auth/refresh
+Body (JSON):
+```json
+{
+  "refreshToken": "..."
+}
+```
+Resposta esperada:
+```json
+{
+  "accessToken": "...",
+  "refreshToken": "..."
+}
+```
 
 ---
 
-## Estrutura inicial do projeto
+## Estrutura do projeto
 - `index.js` — código principal da API
 - `docker-compose.yml` — configuração do MongoDB
-- `.gitignore` — ignora arquivos/pastas desnecessários (ex: data/, node_modules/)
+- `.gitignore` — ignora arquivos/pastas desnecessários (ex: data/, node_modules/, .env)
 
 ---
 
@@ -72,6 +129,5 @@ No Insomnia ou Postman:
 ---
 
 ## Próximos passos
-- Implementar login e geração de JWT
-- Proteger rotas com autenticação
+- Proteger rotas com autenticação (middleware JWT)
 - Criar CRUD de tarefas (todos)
