@@ -36,6 +36,47 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
+
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = 'sua_chave_secreta'; // Troque por uma chave forte em produção
+const JWT_REFRESH_SECRET = 'sua_chave_refresh';
+
+// Rota de login
+app.post('/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Preencha email e password' });
+  }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: 'Usuário não encontrado' });
+    }
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
+      return res.status(400).json({ error: 'Senha incorreta' });
+    }
+    // Gerar tokens
+    const accessToken = jwt.sign(
+      { userId: user._id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+    const refreshToken = jwt.sign(
+      { userId: user._id, email: user.email },
+      JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
+    res.json({
+      accessToken,
+      refreshToken,
+      user: { _id: user._id, name: user.name, email: user.email }
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao fazer login' });
+  }
+});
+
 // Inicia o servidor
 app.listen(3000, () => {
   console.log('API rodando em http://localhost:3000');

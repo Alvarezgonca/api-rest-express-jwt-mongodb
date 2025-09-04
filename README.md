@@ -25,6 +25,7 @@ cd api-rest-node-2
 ```bash
 npm install
 npm install bcrypt
+npm install jsonwebtoken
 ```
 
 ### 3. Subir o MongoDB com Docker Compose
