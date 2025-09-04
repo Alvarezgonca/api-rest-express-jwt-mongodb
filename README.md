@@ -16,7 +16,7 @@ API REST básica para registro de usuários, autenticação e CRUD de tarefas pr
 
 ### 1. Clonar o repositório
 ```bash
-git clone <url-do-seu-repositorio>
+git clone git@github.com:Alvarezgonca/api-rest-express-jwt-mongodb.git
 cd api-rest-node-2
 ```
 
