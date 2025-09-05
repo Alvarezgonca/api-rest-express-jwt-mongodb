@@ -1,3 +1,4 @@
+
 # API de Autenticação e CRUD com Node.js, MongoDB e JWT
 
 ## Descrição
@@ -129,6 +130,110 @@ Resposta esperada:
   "_id": "...",
   "name": "Seu Nome",
   "email": "seu@email.com"
+}
+```
+
+
+### Criar tarefa (todo)
+**POST /todos**
+URL: http://localhost:3000/todos
+
+No Insomnia/Postman, vá na aba Headers e adicione:
+```
+Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
+```
+Body (JSON):
+```json
+{
+  "title": "Estudar Node.js",
+  "done": false
+}
+```
+Resposta esperada:
+```json
+{
+  "_id": "...",
+  "title": "Estudar Node.js",
+  "done": false,
+  "owner": "...",
+  "__v": 0
+}
+```
+
+### Listar tarefas do usuário
+**GET /todos**
+URL: http://localhost:3000/todos
+Headers:
+```
+Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
+```
+Resposta esperada:
+```json
+[
+  {
+    "_id": "...",
+    "title": "Estudar Node.js",
+    "done": false,
+    "owner": "...",
+    "__v": 0
+  }
+]
+```
+
+### Buscar tarefa específica
+**GET /todos/:id**
+URL: http://localhost:3000/todos/ID_DA_TAREFA
+Headers:
+```
+Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
+```
+Resposta esperada:
+```json
+{
+  "_id": "...",
+  "title": "Estudar Node.js",
+  "done": false,
+  "owner": "...",
+  "__v": 0
+}
+```
+
+### Atualizar tarefa
+**PUT /todos/:id**
+URL: http://localhost:3000/todos/ID_DA_TAREFA
+Headers:
+```
+Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
+```
+Body (JSON):
+```json
+{
+  "title": "Novo título",
+  "done": true
+}
+```
+Resposta esperada:
+```json
+{
+  "_id": "...",
+  "title": "Novo título",
+  "done": true,
+  "owner": "...",
+  "__v": 0
+}
+```
+
+### Remover tarefa
+**DELETE /todos/:id**
+URL: http://localhost:3000/todos/ID_DA_TAREFA
+Headers:
+```
+Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
+```
+Resposta esperada:
+```json
+{
+  "message": "Tarefa removida com sucesso"
 }
 ```
 

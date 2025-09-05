@@ -1,3 +1,7 @@
+
+// =========================
+// Imports e configuração
+// =========================
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -14,7 +18,9 @@ mongoose.connect('mongodb://localhost:27017/api');
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
-// Modelo User
+// =========================
+// Modelos
+// =========================
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -22,7 +28,16 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// Middleware de autenticação JWT
+const todoSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  done: { type: Boolean, default: false },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+});
+const Todo = mongoose.model('Todo', todoSchema);
+
+// =========================
+// Middlewares
+// =========================
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -38,7 +53,11 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// Rota de registro
+// =========================
+// Rotas de autenticação
+// =========================
+
+// Registro de novo usuário
 app.post('/auth/register', async (req, res) => {
   const { name, email, password } = req.body;
   if (!name || !email || !password) {
@@ -58,7 +77,7 @@ app.post('/auth/register', async (req, res) => {
   }
 });
 
-// Rota de login
+// Login do usuário
 app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -94,7 +113,7 @@ app.post('/auth/login', async (req, res) => {
   }
 });
 
-// Rota de refresh token
+// Gera novo accessToken a partir do refreshToken
 app.post('/auth/refresh', async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) {
@@ -118,7 +137,11 @@ app.post('/auth/refresh', async (req, res) => {
   }
 });
 
-// Rota protegida: retorna dados do usuário autenticado
+// =========================
+// Rotas protegidas (usuário e todos)
+// =========================
+
+// Retorna dados do usuário autenticado
 app.get('/me', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('-password');
@@ -131,7 +154,82 @@ app.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// Inicia o servidor
+// Cria uma nova tarefa (todo)
+app.post('/todos', authMiddleware, async (req, res) => {
+  const { title, done } = req.body;
+  if (!title) {
+    return res.status(400).json({ error: 'O campo title é obrigatório' });
+  }
+  try {
+    const todo = new Todo({
+      title,
+      done: done || false,
+      owner: req.user.userId
+    });
+    await todo.save();
+    res.status(201).json(todo);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao criar tarefa' });
+  }
+});
+
+// Lista todas as tarefas do usuário autenticado
+app.get('/todos', authMiddleware, async (req, res) => {
+  try {
+    const todos = await Todo.find({ owner: req.user.userId });
+    res.json(todos);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar tarefas' });
+  }
+});
+
+// Busca uma tarefa específica do usuário
+app.get('/todos/:id', authMiddleware, async (req, res) => {
+  try {
+    const todo = await Todo.findOne({ _id: req.params.id, owner: req.user.userId });
+    if (!todo) {
+      return res.status(404).json({ error: 'Tarefa não encontrada' });
+    }
+    res.json(todo);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar tarefa' });
+  }
+});
+
+// Atualiza uma tarefa do usuário
+app.put('/todos/:id', authMiddleware, async (req, res) => {
+  const { title, done } = req.body;
+  try {
+    const todo = await Todo.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user.userId },
+      { title, done },
+      { new: true, runValidators: true }
+    );
+    if (!todo) {
+      return res.status(404).json({ error: 'Tarefa não encontrada' });
+    }
+    res.json(todo);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar tarefa' });
+  }
+});
+
+// Remove uma tarefa do usuário
+app.delete('/todos/:id', authMiddleware, async (req, res) => {
+  try {
+    const todo = await Todo.findOneAndDelete({ _id: req.params.id, owner: req.user.userId });
+    if (!todo) {
+      return res.status(404).json({ error: 'Tarefa não encontrada' });
+    }
+    res.json({ message: 'Tarefa removida com sucesso' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao remover tarefa' });
+  }
+});
+
+// =========================
+// Inicialização do servidor
+// =========================
 app.listen(3000, () => {
   console.log('API rodando em http://localhost:3000');
 });
