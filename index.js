@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 
 // Conexão com o MongoDB
-mongoose.connect('mongodb://localhost:27017/api');
+mongoose.connect('mongodb://mongo:27017/api');
 
 // Variáveis de ambiente para JWT
 const JWT_SECRET = process.env.JWT_SECRET;

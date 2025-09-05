@@ -1,4 +1,5 @@
 
+
 # API de Autenticação e CRUD com Node.js, MongoDB e JWT
 
 ## Descrição
@@ -6,54 +7,50 @@ API REST básica para registro de usuários, autenticação e CRUD de tarefas pr
 
 ---
 
-## Pré-requisitos
-- Node.js instalado
+## Como rodar o projeto (recomendado: Docker Compose)
+
+### Pré-requisitos
 - Docker e Docker Compose instalados
-- Git instalado (opcional, para versionamento)
+- Git instalado
 
----
-
-
-## Como rodar o projeto
-
-1. **Clonar o repositório**
+### Passos
+1. **Clone o repositório:**
   ```bash
   git clone git@github.com:Alvarezgonca/api-rest-express-jwt-mongodb.git
   cd api-rest-express-jwt-mongodb
   ```
 
-2. **Instalar dependências**
+2. **Configure as variáveis de ambiente:**
+  - Copie o arquivo de exemplo:
+    ```bash
+    cp .env.example .env
+    ```
+  - Edite o `.env` e defina valores seguros para `JWT_SECRET` e `JWT_REFRESH_SECRET`.
+
+3. **Suba a aplicação (API + MongoDB):**
   ```bash
-  npm install
-  npm install bcrypt jsonwebtoken dotenv
+  docker compose up -d --build
   ```
 
-3. **Configurar variáveis de ambiente**
-  Crie um arquivo `.env` na raiz do projeto com suas próprias chaves seguras:
-  ```
-  JWT_SECRET=sua_chave_super_secreta_aqui
-  JWT_REFRESH_SECRET=sua_chave_refresh_secreta_aqui
-  ```
-  O pacote `dotenv` carrega automaticamente as variáveis do `.env` para o código Node.js.
-
-4. **Subir o MongoDB com Docker Compose**
-  ```bash
-  docker compose up -d
-  ```
-
-5. **Rodar a API**
-  ```bash
-  node index.js
-  ```
-
-A API estará disponível em http://localhost:3000
+4. Acesse a API em: http://localhost:3000
 
 ---
 
+## Estrutura do projeto
+- `index.js` — código principal da API
+- `Dockerfile` — build da imagem Node.js
+- `docker-compose.yml` — orquestração da API e MongoDB
+- `.env.example` — exemplo de variáveis de ambiente
+- `.env` — suas variáveis reais (NÃO versionar)
+- `.dockerignore`/`.gitignore` — ignora arquivos/pastas desnecessários
+- `data/` — persistência do MongoDB (criada automaticamente)
+
+---
 
 ## Testando a API
 
 Você pode testar as rotas usando Insomnia, Postman ou curl.
+
 
 ### Registro de usuário
 **POST /auth/register**
@@ -72,6 +69,7 @@ Resposta esperada:
   "message": "Usuário registrado com sucesso"
 }
 ```
+
 
 ### Login
 **POST /auth/login**
@@ -97,6 +95,7 @@ Resposta esperada:
 ```
 
 
+
 ### Refresh Token
 **POST /auth/refresh**
 URL: http://localhost:3000/auth/refresh
@@ -113,6 +112,7 @@ Resposta esperada:
   "refreshToken": "..."
 }
 ```
+
 
 ### Dados do usuário autenticado (/me)
 **GET /me**
@@ -132,6 +132,7 @@ Resposta esperada:
   "email": "seu@email.com"
 }
 ```
+
 
 
 ### Criar tarefa (todo)
@@ -160,6 +161,7 @@ Resposta esperada:
 }
 ```
 
+
 ### Listar tarefas do usuário
 **GET /todos**
 URL: http://localhost:3000/todos
@@ -180,6 +182,7 @@ Resposta esperada:
 ]
 ```
 
+
 ### Buscar tarefa específica
 **GET /todos/:id**
 URL: http://localhost:3000/todos/ID_DA_TAREFA
@@ -197,6 +200,7 @@ Resposta esperada:
   "__v": 0
 }
 ```
+
 
 ### Atualizar tarefa
 **PUT /todos/:id**
@@ -223,6 +227,7 @@ Resposta esperada:
 }
 ```
 
+
 ### Remover tarefa
 **DELETE /todos/:id**
 URL: http://localhost:3000/todos/ID_DA_TAREFA
@@ -239,28 +244,18 @@ Resposta esperada:
 
 ---
 
+
 ## Como funciona o middleware de autenticação JWT?
 
-O middleware verifica se o accessToken enviado no header Authorization é válido. Se for, libera o acesso à rota protegida (ex: /me). Se não for, retorna erro 401. Use sempre o header:
+O middleware verifica se o accessToken enviado no header Authorization é válido. Se for, libera o acesso à rota protegida (ex: /me, /todos). Se não for, retorna erro 401. Use sempre o header:
 ```
 Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
 ```
 
 ---
 
-## Estrutura do projeto
-- `index.js` — código principal da API
-- `docker-compose.yml` — configuração do MongoDB
-- `.gitignore` — ignora arquivos/pastas desnecessários (ex: data/, node_modules/, .env)
-
----
 
 ## Observações
 - O banco MongoDB é persistido na pasta `data/` (criada pelo Docker Compose)
 - Para apagar todos os dados, basta remover a pasta `data/` ou usar `docker compose down -v`
 - O registro de usuário já está funcionando e salva a senha criptografada
-
----
-
-## Próximos passos
-- Criar CRUD de tarefas (todos)

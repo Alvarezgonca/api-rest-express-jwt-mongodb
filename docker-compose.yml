@@ -7,3 +7,24 @@ services:
     restart: always
     volumes:
       - ./data:/data/db
+    networks:
+      - backend
+
+  api:
+    build: .
+    container_name: api-node-jwt
+    ports:
+      - "3000:3000"
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    depends_on:
+      - mongo
+    restart: always
+    command: node index.js
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
