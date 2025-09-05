@@ -95,6 +95,7 @@ Resposta esperada:
 }
 ```
 
+
 ### Refresh Token
 **POST /auth/refresh**
 URL: http://localhost:3000/auth/refresh
@@ -110,6 +111,34 @@ Resposta esperada:
   "accessToken": "...",
   "refreshToken": "..."
 }
+```
+
+### Dados do usuário autenticado (/me)
+**GET /me**
+URL: http://localhost:3000/me
+
+No Insomnia/Postman, vá na aba Headers e adicione:
+```
+Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
+```
+O accessToken é obtido no login. Não envie no body!
+
+Resposta esperada:
+```json
+{
+  "_id": "...",
+  "name": "Seu Nome",
+  "email": "seu@email.com"
+}
+```
+
+---
+
+## Como funciona o middleware de autenticação JWT?
+
+O middleware verifica se o accessToken enviado no header Authorization é válido. Se for, libera o acesso à rota protegida (ex: /me). Se não for, retorna erro 401. Use sempre o header:
+```
+Authorization: Bearer SEU_ACCESS_TOKEN_AQUI
 ```
 
 ---
@@ -129,5 +158,4 @@ Resposta esperada:
 ---
 
 ## Próximos passos
-- Proteger rotas com autenticação (middleware JWT)
 - Criar CRUD de tarefas (todos)

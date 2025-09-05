@@ -22,6 +22,22 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+// Middleware de autenticação JWT
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Token não enviado' });
+  }
+  const token = authHeader.split(' ')[1];
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload; // payload contém userId e email
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Token inválido ou expirado' });
+  }
+}
+
 // Rota de registro
 app.post('/auth/register', async (req, res) => {
   const { name, email, password } = req.body;
@@ -99,6 +115,19 @@ app.post('/auth/refresh', async (req, res) => {
     res.json({ accessToken, refreshToken: newRefreshToken });
   } catch (err) {
     res.status(401).json({ error: 'Refresh token inválido ou expirado' });
+  }
+});
+
+// Rota protegida: retorna dados do usuário autenticado
+app.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar usuário' });
   }
 });
 
